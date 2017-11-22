@@ -50,12 +50,12 @@ export default {
 <style lang="scss" scoped>
 .imagen-full{
   cursor: pointer;
-  width: 680px;
+  width: 700px;
   display: inline-block;
   &.activo{
     position: fixed;
     top: 20px;
-    width: 80%;
+    width: 90%;
     border: 1px solid #ccc;
     z-index: 999;
     height: 90%;

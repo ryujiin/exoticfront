@@ -37,9 +37,9 @@
             label.file-label
               input.file-input(type='file', name='resume', @change="upLoadFoto")
               .perfil
-                .figure
+                .figure.image.is-square
                   img(:src="getPerfil.cliente.foto" v-if="getPerfil.cliente.foto")
-                  img(v-else, src="http://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=256")
+                  img(v-else, src="/static/img/avatar.png")
       .column.is-12.has-text-centered
         button.button.is-primary.is-medium(type="submit", @click="enviarPerfil") Actualizar
     h2.subtitle
@@ -142,7 +142,7 @@ export default {
       var formData = new FormData()
       formData.append('usuario', this.getPerfil.id)
       formData.append('foto', files[0], files[0].name)
-      editProfileFoto(formData, this.getPerfil.id, this.getToken)
+      editProfileFoto(formData, this.getPerfil.cliente.id, this.getToken)
       .then(res => {
         this.getUserPerfil()
       })

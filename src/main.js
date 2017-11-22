@@ -13,6 +13,7 @@ import VueLocalStorage from 'vue-localstorage'
 import VueHead from 'vue-head'
 import VueScrollTo from 'vue-scrollto'
 import VueProgressiveImage from 'vue-progressive-image'
+import VueAnalytics from 'vue-analytics'
 
 const options = {
   color: '#23d160',
@@ -51,6 +52,11 @@ Vue.config.productionTip = false
 Vue.use(VueLocalStorage, {
   name: 'ls',
   createComputed: true // created computed members from your variable declarations
+})
+
+Vue.use(VueAnalytics, {
+  id: 'UA-109870526-1',
+  router
 })
 
 /* eslint-disable no-new */

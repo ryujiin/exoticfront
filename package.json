@@ -21,6 +21,7 @@
     "trae": "^1.4.2",
     "vee-validate": "^2.0.0-rc.19",
     "vue": "^2.5.2",
+    "vue-analytics": "^5.3.2",
     "vue-carousel": "^0.6.5",
     "vue-cookie": "^1.1.4",
     "vue-head": "^2.0.11",
@@ -30,6 +31,8 @@
     "vue-progressive-image": "^2.3.1",
     "vue-router": "^3.0.1",
     "vue-scrollto": "^2.7.9",
+    "vue2-editor": "^2.3.11",
+    "vue2-multi-uploader": "^1.4.1",
     "vuex": "^3.0.0"
   },
   "devDependencies": {

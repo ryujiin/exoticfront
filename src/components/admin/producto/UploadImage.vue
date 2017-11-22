@@ -1,51 +1,58 @@
 <template lang="pug">
-.uploadImages
+div
   form(enctype='multipart/form-data', novalidate='', v-if='isInitial || isSaving')
+    h1 Upload images
     .dropbox
       input.input-file(type='file', multiple='', :name='uploadFieldName', :disabled='isSaving', @change='filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length', accept='image/*')
       p(v-if='isInitial')
-        | Sube tus fotos con el producto 
+        | Drag your file(s) here to begin
         br
-        strong Obten el 10% de descuento en tu siguiente compra!
+        |  or click to browse
       p(v-if='isSaving')
         | Uploading {{ fileCount }} files...
   // SUCCESS
   div(v-if='isSuccess')
-    h2 Uploaded {{ uploadedFiles.length }} file(s) successfully.
+    h2 Subiste {{ uploadedFiles.length }} Imagene(s) Correctamente.
     p
-      a(href='javascript:void(0)', @click='reset()') Upload again
-    ul.list-unstyled
-      li(v-for='item in uploadedFiles')
-        img.img-responsive.img-thumbnail(:src='item.url', :alt='item.originalName')
+      a(href='javascript:void(0)', @click='reset()') Subir Otras Imagenes
+    .columns
+      .column.is-3(v-for='item in uploadedFiles')
+        .box
+          figure.image
+            img(:src="item.imagen_thum")
   // FAILED
   div(v-if='isFailed')
-    h2 Uploaded failed.
+    h2 Subiste failed.
     p
       a(href='javascript:void(0)', @click='reset()') Try again
     pre.
-      \n{{ uploadError }}   
+      \n{{ uploadError }}    
+
 
 </template>
 
 <script>
-  import {upload} from '@/services/axios/lovizApiImage'
-  
+  import {mapGetters} from 'vuex'
+  import { uploadImageProducto } from '@/services/axios/lovizApiImage'
+
   const STATUS_INITIAL = 0
   const STATUS_SAVING = 1
   const STATUS_SUCCESS = 2
   const STATUS_FAILED = 3
 
   export default {
-    props: ['comentario'],
+    props: ['producto'],
+    name: 'uploadedFiles',
     data () {
       return {
         uploadedFiles: [],
         uploadError: null,
         currentStatus: null,
-        uploadFieldName: 'foto'
+        uploadFieldName: 'photos'
       }
     },
     computed: {
+      ...mapGetters(['getToken']),
       isInitial () {
         return this.currentStatus === STATUS_INITIAL
       },
@@ -70,27 +77,26 @@
         // upload data to the server
         this.currentStatus = STATUS_SAVING
 
-        upload(formData)
+        uploadImageProducto(formData, this.getToken)
           .then(x => {
             this.uploadedFiles.push(x)
-            // this.currentStatus = STATUS_SUCCESS;
+            this.currentStatus = STATUS_SUCCESS
           })
           .catch(err => {
-            console.log(err)
             this.uploadError = err.response
             this.currentStatus = STATUS_FAILED
           })
       },
       filesChange (fieldName, fileList) {
         // handle file changes
-        var i
         if (!fileList.length) return
 
+        var i
         // append the files to FormData
         for (i = 0; i < fileList.length; i++) {
           var formData = new FormData()
-          formData.append('comentario', this.comentario.id)
-          formData.append(fieldName, fileList[i], fileList[i].name)
+          formData.append('producto', this.producto.id)
+          formData.append('foto', fileList[i], fileList[i].name)
           this.save(formData)
         }
       }
@@ -107,8 +113,8 @@
     outline-offset: -10px;
     background: lightcyan;
     color: dimgray;
-    padding: 5px 5px;
-    min-height: 50px; /* minimum height */
+    padding: 10px 10px;
+    min-height: 200px; /* minimum height */
     position: relative;
     cursor: pointer;
   }
@@ -116,7 +122,7 @@
   .input-file {
     opacity: 0; /* invisible but it's there! */
     width: 100%;
-    height: 100px;
+    height: 200px;
     position: absolute;
     cursor: pointer;
   }
@@ -128,6 +134,6 @@
   .dropbox p {
     font-size: 1.2em;
     text-align: center;
-    padding: 20px 0;
+    padding: 50px 0;
   }
 </style>

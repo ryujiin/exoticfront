@@ -2,20 +2,17 @@
 .page-loader(v-if="!load")
   .contenido
     .letras
-      div L
-      div O
-      div V
-      div I
-      div Z
-      div 
-      div D
-      div C
+      div(v-for="letra in getTextoPageLoading") {{letra}}
 </template>
 
 <script>
+import {mapGetters} from 'vuex'
 
 export default {
   name: 'pageloader',
+  computed: {
+    ...mapGetters(['getTextoPageLoading'])
+  },
   props: {
     load: {
       default: false

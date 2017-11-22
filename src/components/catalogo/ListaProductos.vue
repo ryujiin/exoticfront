@@ -19,6 +19,9 @@ div
                 img(:src="p.thum1")
                 img.thum2(:src="p.thum2")
             .card-content.has-text-centered
+              p(:class="{'has-text-danger': !p.activo, 'has-text-success': p.activo}" v-if="getPerfil.staff")
+                strong Activo: 
+                span {{p.activo}}
               span.card-title {{p.nombre}}
               br
               span.has-text-weight-bold ({{p.texto_variacion}})
@@ -38,11 +41,14 @@ import lovizApiProductoService from '@/services/catalogo/productos'
 
 import lvSpinner from '@/components/shared/spinner'
 
-import {mapMutations} from 'vuex'
+import {mapMutations, mapGetters} from 'vuex'
 
 export default {
   components: {
     lvSpinner
+  },
+  computed: {
+    ...mapGetters(['getPerfil'])
   },
   name: 'Productos',
   props: {

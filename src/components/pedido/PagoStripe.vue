@@ -71,7 +71,8 @@ export default {
   },
   mounted () {
     const self = this
-    var stripe = window.Stripe('pk_test_Gv5V5DpIyVOvL4SaurgoEpBN')
+    // var stripe = window.Stripe('pk_test_Gv5V5DpIyVOvL4SaurgoEpBN')
+    var stripe = window.Stripe('pk_live_RMss6jsZ1PNqd3BFMpJfdF3e')
     var elements = stripe.elements()
     var card = elements.create('card', {
       style: {

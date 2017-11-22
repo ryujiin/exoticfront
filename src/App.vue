@@ -1,5 +1,5 @@
 <template lang="pug">
-  #app
+  #app(@mouseleave="mostrarCupon")
     transition(name="fade")
       lv-page-loader(v-if='getPageloading')
     vue-progress-bar
@@ -9,6 +9,8 @@
     router-view
     lv-footer
     lv-modal-login
+    lv-modal-foto
+    lv-modal-cupon
 </template>
 
 <script>
@@ -20,25 +22,36 @@ import lvModalLogin from '@/components/user/ModalLogin.vue'
 import LvCartSlide from '@/components/layout/CartSlide.vue'
 import lvMenuMobilSlide from '@/components/layout/MenuMobilSlide.vue'
 
+import lvModalFoto from '@/components/shared/modalFoto'
+import lvModalCupon from '@/components/shared/ModalCupon'
+
 import {mapGetters, mapActions, mapMutations} from 'vuex'
 
 export default {
   name: 'app',
   components: {
-    LvHeader, LvFooter, lvModalLogin, LvCartSlide, lvPageLoader, lvMenuMobilSlide
+    LvHeader, LvFooter, lvModalLogin, LvCartSlide, lvPageLoader, lvMenuMobilSlide, lvModalFoto, lvModalCupon
   },
   computed: {
-    ...mapGetters(['getCategorias', 'getPageloading'])
+    ...mapGetters(['getCategorias', 'getPageloading', 'getPerfil'])
   },
   methods: {
-    ...mapActions(['buscarCategorias']),
-    ...mapMutations(['changePageLoading'])
+    ...mapActions(['buscarCategorias', 'buscarVariaciones']),
+    ...mapMutations(['changePageLoading', 'changeModalCupon']),
+    mostrarCupon () {
+      if (!this.getPerfil.id) {
+        this.changeModalCupon(true)
+      };
+    }
   },
   created () {
     if (this.getCategorias.length === 0) {
       this.buscarCategorias(this.$route.params.slug)
       .then(res => {
-        this.changePageLoading(false)
+        this.buscarVariaciones()
+        .then(res => {
+          this.changePageLoading(false)
+        })
       })
     }
   }
@@ -46,15 +59,19 @@ export default {
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css?family=Barlow+Semi+Condensed|Roboto+Condensed');
 @import '../node_modules/bulma/bulma.sass';
 
 .italic{
   font-style: italic;
   font-family: georgia;
 }
+.title, .subtitle{
+  font-family: 'Barlow Semi Condensed', sans-serif;
+}
 #app {
   margin-top: 75px;
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Roboto Condensed', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #111;

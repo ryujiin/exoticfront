@@ -61,4 +61,19 @@ lovizApiUserService.resetPass = function (dato) {
   .catch(err => err.data)
 }
 
+lovizApiUserService.createSuscriptor = function (dato) {
+  return lovizApiService.post('/api/user/sucribirse/', dato)
+  .then(res => res.data)
+  .catch(err => err.data)
+}
+
+lovizApiUserService.getCupon = function (nombre) {
+  return lovizApiService.get('/cliente/cupones/', {
+    params: {
+      nombre: nombre
+    }
+  })
+  .then(res => res.data)
+  .catch(err => err.data)
+}
 export default lovizApiUserService

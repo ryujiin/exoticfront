@@ -6,8 +6,9 @@
     .container
       .barra
         .titulos
-          .padre(v-if="getCategoriaPadre") {{getCategoriaPadre.nombre}}
-          .titulo {{getCategoriaActual.nombre}}
+          .subtitle(v-if="getCategoriaPadre") {{getCategoriaPadre.nombre}}
+          .subtitle(v-else) Coleccion
+          .title {{getCategoriaActual.nombre}}
         .menus
           .contador
             span {{getNumArticulos}} productos

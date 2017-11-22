@@ -5,7 +5,8 @@
         .columns
           .column.is-6.has-text-centered
             figure.logo
-              img(src="/static/img/logooso.png" alt="Loviz DelCarpio")
+              img(src="/static/img/logooso.png" alt="Loviz DelCarpio" v-if="getTienda.logo")
+              .title.is-1(v-else) {{getTienda.nombre}}
           .column.is-2
             .f_menu
               p.menulabel Ayuda
@@ -20,7 +21,7 @@
                   router-link(:to={name: 'Terminos'}) Términos y Condiciones
           .column.is-2
             .f_menu
-              p.menulabel Acerca de Loviz Dc
+              p.menulabel Acerca de {{getTienda.nombre}}
               ul.menu-list
                 li
                   router-link(:to={name: 'Sobre'}) Sobre Nosotros

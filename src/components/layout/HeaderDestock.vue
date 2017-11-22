@@ -3,7 +3,8 @@ nav.navbar.header(role='navigation', aria-label='main navigation')
   .container
     .navbar-brand
       router-link.navbar-item(to='/')
-        img(src="/static/img/logonegro.png" height="28")
+        img(src="/static/img/logonegro.png" height="28" v-if="getTienda.logo")
+        .title(v-else) {{getTienda.nombre}}
     .navbar-item.has-dropdown.is-hoverable(v-for="item in getTienda.menuTop" key="item.id")
       router-link.navbar-link(:to="item.link")
         | {{item.texto}}
@@ -19,12 +20,31 @@ nav.navbar.header(role='navigation', aria-label='main navigation')
         span {{getPerfil.first_name}} {{getPerfil.last_name}}
         span.icon.is-large
           i.fa.fa-user-o.fa-lg
-      a.navbar-item.italic(v-else @click="changeModalLogin(true)")
+      a.navbar-item.italic.user(v-else @click="changeModalLogin(true)")
         span Ingresar / Registrar
         span.icon.is-large
           i.fa.fa-user-o.fa-lg
       a.navbar-item
         lv-cart-button
+      .navbar-item.has-dropdown.is-hoverable(v-if="getPerfil.staff")
+        a.navbar-link(href='/admin/productos/')
+          | Admin
+        .navbar-dropdown.is-boxed
+          router-link.navbar-item(to='/admin/productos/')
+            | Productos
+          a.navbar-item(href='https://bulma.io/documentation/modifiers/syntax/')
+            | Modifiers
+          a.navbar-item(href='https://bulma.io/documentation/columns/basics/')
+            | Columns
+          a.navbar-item(href='https://bulma.io/documentation/layout/container/')
+            | Layout
+          a.navbar-item(href='https://bulma.io/documentation/form/general/')
+            | Form
+          hr.navbar-divider
+          a.navbar-item(href='https://bulma.io/documentation/elements/box/')
+            | Elements
+          a.navbar-item.is-active(href='https://bulma.io/documentation/components/breadcrumb/')
+            | Components
 </template>
 <script>
 import {mapMutations, mapGetters} from 'vuex'
@@ -50,8 +70,14 @@ export default {
   z-index: 10;
   min-height: 4.25rem;
 }
-.navbar-item img{
-  max-height: 3.75rem;
+.navbar-item {
+  text-transform: uppercase;
+  img{
+    max-height: 3.75rem;
+  } 
+}
+.navbar-link::after{
+  border-color: #111;
 }
 .header{
   box-shadow: 0 2px 5px rgba(0,0,0,.16);
@@ -63,5 +89,8 @@ export default {
       background-color: #fff
     }
   }
+}
+.user{
+  text-transform: capitalize;
 }
 </style>

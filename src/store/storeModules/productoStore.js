@@ -35,6 +35,15 @@ const actions = {
         })
     })
     return promise
+  },
+  editarProducto (context, producto) {
+    const promise = new Promise(function (resolve, reject) {
+      lovizProductoService.editarProductosAdmin(producto)
+        .then(res => {
+          resolve(res)
+        })
+    })
+    return promise
   }
 }
 

@@ -18,6 +18,9 @@ import Felicidades from '@/views/checkout/Felicidad'
 import AddVariacion from '@/views/admin/AgregarVariacion'
 
 import PassReset from '@/views/perfil/UserResetPass'
+
+import AdminListaProductos from '@/views/admin/AdminListaProductos'
+
 Vue.use(Router)
 
 export default new Router({
@@ -87,6 +90,11 @@ export default new Router({
       path: '/gracias/:numero_pedido/',
       name: 'Felicidades',
       component: Felicidades
+    },
+    {
+      path: '/admin/productos',
+      name: 'AdminListaProductos',
+      component: AdminListaProductos
     }
   ]
 })

@@ -1,97 +1,76 @@
 <template lang="pug">
 .producto
-  .grabar
-    a.button.is-success.is-large(@click="grabarProducto")
-        span.icon.is-large
-          i.fa.fa-save
-        span Grabar Producto
-  .hero-producto
-  .producto-detalle-imagen
-    .galeria(v-if="producto.id")
-      .thums
-      .field
-        .file.is-large.is-boxed.has-name
-          label.file-label
-            input.file-input(type='file', name='resume' multiple)
-            span.file-cta
-              span.file-icon
-                i.fa.fa-upload
-              span.file-label
-                | Subir Fotos…
-    .info
-      .card.z-depth-5
-        .card-content
-          .producto-name
-            span.texto-impacto.texto-2
-            .title
-              .field(v-if="!producto.id")
-                label.label Nombre
-                .control
-                  input.input(type='text', placeholder='Text input' v-model="producto.nombre" )
-              span(v-else) {{producto.nombre}}
-            .subtitle
-              .field(v-if="!producto.id")
-                label.label Texto variacion
-                .control
-                  input.input(type='text', placeholder='Text input' v-model="producto.texto_variacion" )
-              span(v-else) ({{producto.texto_variacion}})
-          .producto-categoria
-            .cates(v-for="cate in producto.categorias")
-              router-link.texto-impacto.texto-2.texto-2.button.is-small(:to="`/catalogo/${cate.slug}`") {{cate.nombre}}
-          .producto-precios
-          .producto-review
-          .producto-variaciones
-            .variacion-seleccion
-              .titulo-seleccion.texto-impacto.texto-2 Seleccionado:
-              .opciones-seleccion
-                ul
-                  li.selecionado
-                    figure
-                      a(href="/")
-                        img(:src="getproductoActual.thum")
-                  li(v-for="relacion in producto.relaciones")
-                    figure
-                      router-link(:to="`/producto/${relacion.slug}`")
-                        img(:src="relacion.thum")                  
-            .variacion-talla
-              .titulo-seleccion.texto-impacto.texto-2 Tallas Disponibles:
-              .opciones-seleccion.talla-opciones
-                .talla-opcion(
-                  v-for="varia in variaciones") {{varia.talla}}
-          lv-separador(:alto="10")
-  .producto-detalles
+  .box
     .container
-      .tabs.is-centered
-        ul
-          li()
-            a Descripcion
-      .content
-        .descripcion.columns()
-          .column
-            .descripcion-detalles
-              .title Detalles
-              .subtitle Modelo: Aca se agrega SKU
-              .field(v-if="!producto.id")
-                label.label Descripcion
-                .control
-                  textarea.textarea(placeholder='Textarea' v-model="producto.descripcion")
-              p.contenido(v-else) {{producto.descripcion}}
-              ul
-                li(v-for="caracteristica in caracteristicas")
-                  strong {{caracteristica.nombre}} - 
-                  span {{caracteristica.descripcion}}
-          .column
-            .banner
-              img(src="/static/img/banner-verano.jpg")
+      .columns.is-multiline
+        .column.is-6          
+          .field
+            label.label Nombre
+            .control
+              input.input(type='text', placeholder='Nombre del Producto' v-model="producto.nombre")
+        .column.is-6        
+          .field
+            label.label Variacion
+            .control
+              input.input(type='text', placeholder='Variacion del Producto' v-model="producto.texto_variacion")
+        .column.is-6
+          .field
+            label.label Descripcion
+            .control.has-icons-left.has-icons-right
+              vue-editor(v-model="producto.descripcion")
+        .column.is-6
+          .card
+            header.card-header
+              p.card-header-title
+                | Categorias
+            .card-content
+              .content
+                .field
+                  .select
+                    select(v-model="cateAdd")
+                      option(v-for="c in getCategorias" v-if="c.seccion == 'estilo' || c.seccion == 'coleccion'", :value="c") {{c.full_name}}
+                span.tag(v-for="(cat, index) in categorias" 
+                          @click="remove(index)"
+                          :class="{'is-dark': cat.seccion}") {{cat.nombre}}
+        .column.is-12
+          .card
+            header.card-header
+              p.card-header-title
+                | Caracteristicas
+            .card-content
+              .content
+                .columns(v-for="c in caracteristicas")
+                  .column.is-3
+                    .field
+                      p.control.is-expanded
+                        input.input(type='text', placeholder='Nombre', v-model="c.nombre")
+                  .column.is-9
+                    .field
+                      p.control.is-expanded
+                        input.input(type='email', placeholder='Datos', v-model="c.descripcion")
+                a.button(@click="addCaracteristica")
+                  span.icon
+                    i.fa.fa-plus
+                  span Agregar categoria
+                  
+      p.has-text-centered
+        a.button.is-success.is-large(@click="grabarProducto")
+          span.icon
+            i.fa.fa-save
+          span Guardar Cambios 
 </template>
 
 <script>
 import {mapGetters} from 'vuex'
+import { VueEditor } from 'vue2-editor'
+
 import lvSeparador from '@/components/shared/Separador'
+
+import lovizApiService from '@/services/catalogo/productos'
 
 export default {
   components: {
-    lvSeparador
+    lvSeparador, VueEditor
   },
   data () {
     return {
@@ -105,33 +84,142 @@ export default {
         etiquetas: [],
         activo: false
       },
+      cateAdd: {},
+      categorias: [],
       caracteristicas: [],
-      variaciones: []
+      variaciones: [],
+      num_salvar: 0,
+      relaciones: []
     }
   },
   methods: {
     grabarProducto () {
-
+      if (this.producto.texto_variacion) {
+        if (this.producto.id) {
+          console.log('editar')
+        } else {
+          lovizApiService.createProductosAdmin(this.producto, this.getToken)
+          .then(res => {
+            console.log(res)
+            this.producto.id = res.id
+            this.producto.slug = res.slug
+            this.num_salvar = this.variaciones.length + this.caracteristicas.length
+            this.guardarCategorias()
+            this.guardarVariaciones()
+          })
+        }
+      } else {
+        alert('El texto variacion es necesario')
+      }
+    },
+    guardarCategorias () {
+      if (this.caracteristicas.length !== 0) {
+        var cara = {
+          producto: this.producto.id
+        }
+        for (var i = this.caracteristicas.length - 1; i >= 0; i--) {
+          cara.nombre = this.caracteristicas[i].nombre
+          cara.descripcion = this.caracteristicas[i].descripcion
+          lovizApiService.createCaracteristicaAdmin(cara, this.getToken)
+          .the(res => {
+            this.num_salvar = this.num_salvar - 1
+          })
+        };
+      }
+    },
+    guardarVariaciones () {
+      if (this.producto.id) {
+        for (var i = this.variaciones.length - 1; i >= 0; i--) {
+          this.variaciones[i].producto = this.producto.id
+          lovizApiService.createProductoTalla(this.variaciones[i], this.getToken)
+          .then(res => {
+            this.num_salvar = this.num_salvar - 1
+          })
+        };
+      };
+    },
+    verificar () {
+      if (this.num_salvar === 0) {
+        this.$router.push({name: 'Producto', params: {'slug': this.producto.slug}})
+      };
+    },
+    addCate () {
+      if (this.addCate) {
+        var coincidencia = this.categorias.find((c) => c.id === this.cateAdd.id)
+        if (!coincidencia) {
+          this.categorias.push(this.cateAdd)
+          if (this.cateAdd.padre) {
+            this.addPadres(this.cateAdd.padre)
+          }
+        }
+      }
+    },
+    addPadres (slug) {
+      var coincidencia = this.getCategorias.find((c) => c.slug === slug)
+      this.categorias.push(coincidencia)
+      if (coincidencia.padre) {
+        this.addPadres(coincidencia.padre)
+      };
+    },
+    remove (index) {
+      this.categorias.splice(index, 1)
+    },
+    addCaracteristica () {
+      this.caracteristicas.push({nombre: '', descripcion: ''})
+    },
+    changeCaracteristica () {
+      this.cantidad_caracte = this.caracteristicas.length
+    },
+    cambioCategoria () {
+      this.producto.categorias = []
+      for (var i = this.categorias.length - 1; i >= 0; i--) {
+        this.producto.categorias.push(this.categorias[i].id)
+      };
+    },
+    addRelaciones () {
+      this.producto.relaciones = []
+      for (var i = this.relaciones.length - 1; i >= 0; i--) {
+        this.producto.relaciones.push(this.relaciones[i].id)
+      }
+    },
+    addVariacion () {
+      for (var i = this.getproductoActual.variaciones.length - 1; i >= 0; i--) {
+        var varia = {
+          precio_minorista: this.getproductoActual.variaciones[i].precio,
+          talla: this.getVariaciones.find((v) => v.nombre === this.getproductoActual.variaciones[i].talla).id
+        }
+        if (this.getproductoActual.variaciones[i].oferta !== 0) {
+          varia.precio_oferta = this.getproductoActual.variaciones[i].precio_venta
+        };
+        this.variaciones.push(varia)
+      };
     }
   },
   computed: {
-    ...mapGetters(['getPerfil', 'getproductoActual'])
+    ...mapGetters(['getPerfil', 'getproductoActual', 'getCategorias', 'getToken', 'getVariaciones'])
   },
   created () {
     if (this.getPerfil.staff) {
       if (this.getproductoActual.slug === this.$route.params.slug) {
         this.producto.nombre = this.getproductoActual.nombre
-        this.producto.texto_variacion = this.getproductoActual.texto_variacion
         this.producto.descripcion = this.getproductoActual.descripcion
-        this.producto.relaciones = this.getproductoActual.relaciones
-        this.producto.categorias = this.getproductoActual.categorias
+        this.categorias = this.getproductoActual.categorias
         this.producto.etiquetas = this.getproductoActual.etiquetas
-        this.producto.variaciones = this.getproductoActual.variaciones
-        this.producto.caracteristicas = this.getproductoActual.caracteristicas
+        this.caracteristicas = this.getproductoActual.caracteristicas
+        this.relaciones = this.getproductoActual.relaciones
+        this.addVariacion()
       }
     } else {
       this.$router.push({name: 'Home'})
     }
+  },
+  watch: {
+    'cateAdd': 'addCate',
+    'caracteristicas': 'changeCaracteristica',
+    'cantidad_caracte': 'verificar',
+    'categorias': 'cambioCategoria',
+    'relaciones': 'addRelaciones',
+    'num_salvar': 'verificar'
   }
 }
 </script>
@@ -139,134 +227,8 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 
 <style lang="scss" scoped>
-.VueCarousel-navigation-next{
-  right: 50px;    
-}
-.grabar{
-  position: fixed;
-  left: 30px;
-  z-index: 99;
-}
-.producto{
-  margin-top: 150px;
-  position: relative;
-  .hero-producto{
-    min-height: 10px;
-  }
-  .producto-detalle-imagen{
-    position: relative;
-    max-width: 1500px;
-    margin: 0 auto;
-    min-height: 530px;
-    .info{
-      position: absolute;
-      right: 50px;
-      top: 10px;
-      width: 430px;
-    }
-  }
-  .producto-detalles{
-    padding-top: 20px;
-    background-color: #f9f9f9;
-    box-shadow: 0px 0px 5px #888888;
-    padding-bottom: 20px;
-  }
-}
-.producto{
-  .producto-categoria{
-    .cates{
-      display: inline-block;
-      margin: 2px 5px;
-      a{
-        border-radius: 0px;
-      }
-    }
-  }
-  .producto-precios{
-    .producto-precios-variacion{
-      font-size: 2em;
-      div{
-        display: inline-block;
-      }
-      .precio-old{
-        text-decoration: line-through;
-        font-size: 0.5em;
-        margin: 0 10px 0 0;
-      }
-    }
-  }
-  .producto-review{
-    color: #111;
-    .producto-estrellas,.producto-leer-escribir{
-      display: inline-block;
-    }
-    .ratio{
-      text-decoration: underline;
-      margin: 0 5px 0 10px;
-    }
-    .num-coments{
-      margin: 0 10px;
-    }
-    .texto-impacto.texto-2{
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    .modal{
-      .modal-content{
-        background-color: #fff;
-      }
-    }
-  }
-  .producto-variaciones{
-    margin: 20px 0;
-    .variacion-seleccion{
-      .titulo-seleccion,.valor-seleccion{
-        display: inline-block;
-      }
-      .valor-seleccion{
-        margin: 10px;
-      }
-      .opciones-seleccion{
-        ul{
-          li{
-            display: inline-block;
-            width: 80px;
-            margin: 0 10px 0 0;
-            &.selecionado,&:hover{
-              border-bottom: 2px solid #111
-            }
-          }
-        }
-      }
-    }
-    .variacion-talla{
-      .talla-opciones{
-        .talla-opcion{
-          display: inline-block;
-          border: 1px solid #ccc;
-          margin: 0 10px 0 0;
-          color: #111;
-          padding: 5px;
-          cursor: pointer;
-          &:hover,&.activo{
-            border-color: #111
-          }
-        }
-      }
-    }
-  }
-}
-.galeria{
-  margin: 0 20px;
-  background: #f4f4f4;
-  width: 700px;
-  height: 400px;
-  .field{
-    .file-label{
-      margin: 50px auto;
-    }
-  }
-  .thums{
-  }
+.tag{
+  margin: 5px;
+  cursor: pointer;
 }
 </style>

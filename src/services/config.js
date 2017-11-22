@@ -1,5 +1,5 @@
 const configService = {
-  apiUrl: 'https://apiloviz.herokuapp.com/'
+  apiUrl: 'https://exoticsnout.herokuapp.com/'
   // apiUrl: 'http://localhost:8000/'
 }
 
